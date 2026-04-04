@@ -72,11 +72,98 @@
                     });
                 }
             });
-        }, { rootMargin: '-35% 0px -60% 0px' });
+        }, { threshold: [0.1, 0.5, 0.8], rootMargin: "-15% 0px -25% 0px" });
 
         document.querySelectorAll('section[id], header[id]').forEach(function (section) {
             sectionObserver.observe(section);
         });
+    }
+
+    /*
+        Mobile menu toggle logic
+    */
+    var navContainer = document.getElementById('main-nav');
+    var menuToggle   = document.getElementById('menu-toggle');
+    var navLinks     = document.getElementById('nav-links');
+
+    if (menuToggle && navContainer) {
+        menuToggle.addEventListener('click', function () {
+            navContainer.classList.toggle('menu-open');
+        });
+
+        /* Close menu when a link is clicked */
+        navLinks.addEventListener('click', function (e) {
+            if (e.target.classList.contains('nav')) {
+                navContainer.classList.remove('menu-open');
+            }
+        });
+
+        /* Close menu when clicking outside */
+        document.addEventListener('click', function (e) {
+            if (!navContainer.contains(e.target)) {
+                navContainer.classList.remove('menu-open');
+            }
+        });
+    }
+
+    /*
+        Scroll Reveal Observer
+    */
+    var revealObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal').forEach(function (el) {
+        revealObserver.observe(el);
+    });
+
+    /*
+        Dataset Simulator Logic
+    */
+    var simBtn = document.getElementById('run-sim');
+    var simOutput = document.getElementById('sim-output');
+
+    if (simBtn && simOutput) {
+        var steps = [
+            "> Importing pandas as pd...",
+            "> Loading dataset.csv (144,021 rows)...",
+            "> Checking for null values...",
+            "> Found 12 missing values in 'Age' column.",
+            "> Filling missing values with median...",
+            "> Normalizing data structures...",
+            "> Running correlation matrix...",
+            "> DONE: Insights extracted successfully!",
+            "-------------------------------------",
+            "Result: 94.2% accuracy in prediction model."
+        ];
+
+        simBtn.addEventListener('click', function () {
+            simBtn.disabled = true;
+            simOutput.innerHTML = "";
+            var i = 0;
+            var interval = setInterval(function () {
+                if (i < steps.length) {
+                    simOutput.innerHTML += steps[i] + "\n";
+                    simOutput.scrollTop = simOutput.scrollHeight;
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    simBtn.disabled = false;
+                }
+            }, 600);
+        });
+    }
+
+    /*
+        Footer Year
+    */
+    var yearEl = document.getElementById('current-year');
+    if (yearEl) {
+        yearEl.textContent = new Date().getFullYear();
     }
 
 }());

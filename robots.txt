@@ -10,9 +10,6 @@
 User-agent: *
 Allow: /
 
-# Keep internal Cloudflare paths out of search indexes
-Disallow: /cdn-cgi/
-
 # ─────────────────────────────────────────────────────────────
 # AI training opt-out
 # ─────────────────────────────────────────────────────────────
