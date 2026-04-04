@@ -50,11 +50,15 @@ ul h4 {
         box-shadow:   var(--shadow);
         border-color: var(--text);
     }
+    .nav:hover{
+        color : var(--accent-color);
+    }
 }
 
 /* Touch feedback — replaces hover on phones and tablets */
 .hover-scale:active { transform: scale(0.97);  border-color: var(--accent-color); }
 .hover-card:active  { box-shadow: var(--accent-shadow); }
+.nav:active{ color : var(--accent-color); }
 
 
 /* ── Page sections ───────────────────────────────────────────
