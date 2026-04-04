@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <!--
+        ┌─────────────────────────────────────────┐
+        │  Hassan Mohamed — Personal Portfolio     │
+        │  7assan.site                             │
+        └─────────────────────────────────────────┘
+        Coding decisions at a glance:
+        • Critical CSS is inlined so the hero paints
+          before any network request completes.
+        • styles.css loads async — it only styles
+          sections the user hasn't reached yet.
+        • Fonts load after first paint so they never
+          delay what the user sees first.
+        • me.png is preloaded as early as possible
+          because it's the Largest Contentful Paint.
+        • All JavaScript is deferred — it runs after
+          the page is already visible and interactive.
+    -->
+
+    <!-- The basics — charset first, then viewport -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Tints the browser chrome on Android -->
+    <meta name="theme-color" content="#1c1c1c">
+
+    <!-- ─── SEO ──────────────────────────────────
+         Title includes name + role + location so
+         searches like "Hassan Mohamed developer Egypt"
+         match the most important tag on the page.
+    ─────────────────────────────────────────── -->
+    <title>Hassan Mohamed | Data Analyst &amp; Front-end Developer — Giza, Egypt</title>
+
+    <meta name="description"
+          content="Hassan Mohamed is a Data Analyst and Front-end Developer from Giza, Egypt
+                   with 4+ years of experience in Python, data analysis, and responsive web
+                   development. Available for hire.">
+
+    <meta name="author"  content="Hassan Mohamed">
+    <meta name="robots"  content="index, follow">
+
+    <!-- Tells Google which URL is the "real" one if there are duplicates -->
+    <link rel="canonical" href="https://7assan.site/">
+
+    <!-- ─── Social sharing (Open Graph) ─────────
+         Controls how the link looks when shared on
+         Facebook, LinkedIn, WhatsApp, etc.
+    ─────────────────────────────────────────── -->
+    <meta property="og:type"         content="website">
+    <meta property="og:url"          content="https://7assan.site/">
+    <meta property="og:site_name"    content="Hassan Mohamed's Portfolio">
+    <meta property="og:locale"       content="en_US">
+    <meta property="og:title"        content="Hassan Mohamed | Data Analyst &amp; Front-end Developer">
+    <meta property="og:description"  content="Hassan Mohamed is a Data Analyst and Front-end Developer
+                                              from Giza, Egypt — available for hire. Explore my projects,
+                                              skills, and certificates.">
+    <meta property="og:image"        content="https://7assan.site/preview.png">
+    <meta property="og:image:alt"    content="Hassan Mohamed portfolio preview">
+    <meta property="og:image:width"  content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- ─── Twitter / X card ─────────────────────
+         summary_large_image shows a big banner
+         instead of a tiny thumbnail.
+    ─────────────────────────────────────────── -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="Hassan Mohamed | Data Analyst &amp; Front-end Developer">
+    <meta name="twitter:description" content="Hassan Mohamed is a Data Analyst and Front-end Developer
+                                              from Giza, Egypt — available for hire.">
+    <meta name="twitter:image"       content="https://7assan.site/preview.png">
+    <meta name="twitter:image:alt"   content="Hassan Mohamed portfolio preview">
+
+    <!-- ─── Favicons ─────────────────────────────
+         Multiple formats so every browser and OS
+         picks the best one for its context.
+    ─────────────────────────────────────────── -->
+    <link rel="icon"             type="image/png"    href="favicon-96x96.png" sizes="96x96">
+    <link rel="icon"             type="image/svg+xml" href="favicon.svg">
+    <link rel="shortcut icon"                         href="favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180"      href="apple-touch-icon.png">
+    <link rel="manifest"                              href="site.webmanifest">
+
+    <!-- ─── Critical CSS (inlined) ───────────────
+         These are the only styles needed to paint
+         the nav and the hero section. Inlining them
+         means zero extra network round-trips before
+         the user sees something on screen.
+
+         Everything below the fold lives in styles.css
+         which loads later without blocking anything.
+    ─────────────────────────────────────────── -->
+    <style>
+
+        /* Design tokens — one place to change colors, radii, etc. */
+        :root {
+            --bg:             #1c1c1c;
+            --bg-dark:        #141414;
+            --accent-color:   #3b82f6;
+            --accent-shadow:  0 10px 25px rgba(59, 130, 246, 0.45);
+            --card:           #2a2a2a;
+            --text:           #f2f0ef;
+            --border:         rgba(255, 255, 255, 0.15);
+            --radius-lg:      30px;
+            --radius-md:      12px;
+            --transition:     all 0.25s ease;
+            --shadow:         0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        /* A clean slate — no browser margin/padding surprises */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%; /* stops iOS from bumping font sizes */
+        }
+
+        /*
+            System fonts render instantly — no download needed.
+            Inter and Satoshi swap in once they arrive.
+            This is what keeps FCP fast even on slow connections.
+        */
+        body {
+            background:  var(--bg);
+            color:       var(--text);
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+            max-width:   1100px;
+            margin:      0 auto;
+            padding:     84px 16px 0; /* top clears the fixed nav; sides add breathing room */
+            line-height: 1.65;
+            overflow-x:  hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color:           inherit;
+            text-decoration: none;
+            display:         inline-block;
+            transition:      var(--transition);
+        }
+
+        /* ── Fixed navigation pill ── */
+        nav {
+            position:        fixed;
+            top:             12px;
+            left:            50%;
+            transform:       translateX(-50%);
+            width:           max-content;
+            max-width:       96vw;        /* never overflows on any screen */
+            display:         flex;
+            flex-wrap:       wrap;        /* wraps to a second row on tiny phones */
+            justify-content: center;
+            align-items:     center;
+            gap:             clamp(2px, 0.8vw, 8px);
+            padding:         clamp(0.3rem, 1.2vw, 0.6rem) clamp(0.5rem, 2vw, 1.1rem);
+            border-radius:   var(--radius-lg);
+            border:          2px solid transparent;
+            z-index:         1000;
+            background:      rgba(28, 28, 28, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px); /* Safari */
+            /* Only animate opacity and transform — both GPU composited */
+            transition:      opacity 0.3s ease, transform 0.3s ease,
+                             border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        /* Each nav link */
+        .nav {
+            flex-shrink:   1;
+            min-width:     0;
+            border:        2px solid transparent;
+            border-radius: var(--radius-lg);
+            padding:       clamp(0.18rem, 1vw, 0.38rem) clamp(0.3rem, 1.5vw, 0.75rem);
+            font-size:     clamp(0.68rem, 2.5vw, 0.9rem);
+            white-space:   nowrap;
+            min-height:    36px; /* keeps tap targets comfortable */
+            display:       inline-flex;
+            align-items:   center;
+            transition:    color 0.2s ease, border-color 0.2s ease;
+        }
+
+        /* ── Hero section ── */
+        header {
+            display:         flex;
+            flex-direction:  column;
+            align-items:     center;
+            text-align:      center;
+            gap:             10px;
+            padding:         28px 0 48px;
+        }
+
+        /* Headings and accent text */
+        .h-tag {
+            color:       var(--accent-color);
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+            padding:     10px 0;
+            margin:      6px 0;
+            font-size:   clamp(1.1rem, 4vw, 1.55rem);
+            line-height: 1.3;
+            font-weight: 700;
+        }
+
+        h1.h-tag {
+            font-size:   clamp(1.75rem, 7vw, 3rem);
+            line-height: 1.15;
+        }
+
+        p {
+            padding: 8px 0;
+            margin:  4px 0;
+        }
+
+        /*
+            Explicit width + height + aspect-ratio prevents
+            any layout shift (CLS) while the image loads.
+            min(200px, 50vw) stops it overflowing on tiny phones.
+        */
+        header img {
+            display:       block;
+            margin:        8px auto;
+            border:        3px solid #000;
+            border-radius: 50%;
+            width:         min(200px, 50vw);
+            height:        auto;
+            aspect-ratio:  1 / 1;
+            object-fit:    cover;
+        }
+
+        /* ── Call-to-action buttons ── */
+        .btn {
+            border:          2px solid var(--border);
+            border-radius:   var(--radius-lg);
+            padding:         10px 18px;
+            margin:          5px;
+            min-height:      44px; /* Apple/Google minimum touch target */
+            display:         inline-flex;
+            align-items:     center;
+            justify-content: center;
+            font-size:       clamp(0.8rem, 2.8vw, 0.95rem);
+            transition:      var(--transition);
+        }
+
+        /*
+            Animations only touch opacity and transform.
+            These run entirely on the GPU — no layout
+            recalculations, no paint — so they're free.
+        */
+        .fade-in {
+            opacity:   0;
+            animation: fadeIn 0.9s ease forwards;
+        }
+
+        .slide-up {
+            opacity:   0;
+            transform: translateY(18px);
+            animation: slideUp 0.9s ease forwards 0.15s;
+        }
+
+        @keyframes fadeIn  { to { opacity: 1; } }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* Respect the user's OS "reduce motion" preference */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration:        0.01ms !important;
+                transition-duration:       0.01ms !important;
+            }
+            .fade-in, .slide-up {
+                opacity:   1;
+                transform: none;
+            }
+        }
+
+        /* Extra-small phones (320–360px) — shrink nav text a little more */
+        @media (max-width: 360px) {
+            .nav { font-size: 0.62rem; padding: 0.15rem 0.28rem; }
+        }
+
+    </style>
+
+    <!-- ─── LCP image preload ─────────────────────
+         This tells the browser to start fetching
+         me.png immediately — before it even parses
+         the rest of the HTML. It's the single biggest
+         win for Largest Contentful Paint on mobile.
+    ─────────────────────────────────────────── -->
+    <link rel="preload" as="image" href="me.png" fetchpriority="high">
+
+    <!-- ─── Below-fold styles (async) ───────────
+         styles.css only contains styles for sections
+         the user hasn't scrolled to yet, so loading
+         it asynchronously doesn't delay anything visible.
+         The noscript fallback covers JS-disabled crawlers.
+    ─────────────────────────────────────────── -->
+    <link rel="preload" as="style" href="styles.css" onload="this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="styles.css"></noscript>
+
+    <!-- ─── Web fonts (fully non-blocking) ──────
+         The page uses system fonts from the very
+         first paint. Inter and Satoshi silently
+         swap in once downloaded — no blank text,
+         no delay.  media="print" + onload is the
+         standard pattern for async font loading.
+    ─────────────────────────────────────────── -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+          media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet"
+              href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+    </noscript>
+
+    <link rel="stylesheet"
+          href="https://fonts.cdnfonts.com/css/satoshi"
+          media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/satoshi">
+    </noscript>
+
+    <!-- ─── Structured data (JSON-LD) ────────────
+         Tells Google exactly who this page is about.
+         Person schema helps with Knowledge Panel and
+         rich results. WebSite schema enables Sitelinks
+         search box in search results.
+    ─────────────────────────────────────────── -->
+    <script type="application/ld+json">
+    {
+        "@context":   "https://schema.org",
+        "@type":      "Person",
+        "name":       "Hassan Mohamed",
+        "alternateName": "Abo3li",
+        "url":        "https://7assan.site/",
+        "image":      "https://7assan.site/me.png",
+        "jobTitle":   "Data Analyst & Front-end Developer",
+        "description":"Ambitious self-learner from Giza, Egypt with 4+ years of experience in Python, data analysis, and front-end web development.",
+        "address": {
+            "@type":          "PostalAddress",
+            "addressLocality":"Giza",
+            "addressCountry": "EG"
+        },
+        "sameAs": [
+            "https://www.linkedin.com/in/hassan-mohamed-321569342/",
+            "https://github.com/abo3li-pro",
+            "https://www.facebook.com/Hassan.Mohamed.Fathallah/"
+        ],
+        "knowsAbout": [
+            "Python", "Data Analysis", "HTML", "CSS", "SQL",
+            "NumPy", "Pandas", "Matplotlib", "Flask",
+            "Front-end Development", "Data Visualization"
+        ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type":    "WebSite",
+        "name":     "Hassan Mohamed Portfolio",
+        "url":      "https://7assan.site/"
+    }
+    </script>
+
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav aria-label="Main navigation">
+        <a href="#home"         class="nav hover-scale">Home</a>
+        <a href="#about"        class="nav hover-scale">About</a>
+        <a href="#arsenal"      class="nav hover-scale">Skills</a>
+        <a href="#journey"      class="nav hover-scale">Journey</a>
+        <a href="#projects"     class="nav hover-scale">Projects</a>
+        <a href="#certificates" class="nav hover-scale">Certificates</a>
+        <a href="#contact"      class="nav hover-scale">Contact</a>
+    </nav>
+
+    <!--
+        Hero — this is what the user sees first.
+        Everything here is styled by the inlined CSS above,
+        so it paints the moment the HTML arrives.
+    -->
+    <header id="home">
+        <p class="fade-in">Available for hire</p>
+        <h1 class="h-tag">Hassan Mohamed</h1>
+        <p class="fade-in">Data Analyst • Front-end Developer • Programmer</p>
+
+        <!--
+            fetchpriority="high" + the preload link above = browser
+            fetches this image before almost everything else.
+            loading="eager" prevents any lazy-load delay.
+            Explicit width/height prevents layout shift (CLS).
+        -->
+        <img
+            src="me.png"
+            alt="Hassan Mohamed — Data Analyst and Front-end Developer from Giza, Egypt"
+            width="200"
+            height="200"
+            fetchpriority="high"
+            loading="eager"
+            decoding="async"
+        >
+
+        <a href="#arsenal" class="btn hover-scale slide-up">
+            Let's See My Current Skills!
+        </a>
+    </header>
+
+    <main>
+
+        <!-- About Me -->
+        <section id="about" aria-labelledby="about-heading">
+            <h2 id="about-heading" class="h-tag">About Me</h2>
+            <p>
+                I'm Hassan Mohamed, an ambitious self-learner from Giza, Egypt.
+                What makes me different isn't just what I know — it's how I learn.
+                <br><br>
+                Being a self-learner allows me to dive into any field, at any time,
+                in the way that suits me best. Over the past 4 years, this mindset
+                has helped me build solid experience in programming, data analysis,
+                and front-end development.
+                <br><br>
+                Most of my journey was shaped through real team projects,
+                where I didn't just improve technically — I built strong connections
+                and developed essential soft skills that matter in real-world work.
+                <br><br>
+                Beyond the screen, I maintain a balance between physical and mental activities —
+                from sports like football and running, to strategy games, reading,
+                and creative work. This balance keeps me focused, disciplined,
+                and always ready to perform at my best.
+            </p>
+        </section>
+
+        <!-- Skills — languages, frameworks, and soft skills -->
+        <section id="arsenal" aria-labelledby="skills-heading">
+            <h2 id="skills-heading" class="h-tag">Here Is What I Bring (So Far)</h2>
+
+            <h3 class="h-tag">Languages</h3>
+            <ul class="list">
+                <li class="hover-card"><h4>Python</h4><p>Strong experience in data analysis and problem solving.</p></li>
+                <li class="hover-card"><h4>SQL</h4><p>Basic knowledge with plans to advance.</p></li>
+                <li class="hover-card"><h4>HTML</h4><p>3+ years building structured websites.</p></li>
+                <li class="hover-card"><h4>CSS</h4><p>3+ years designing responsive UI.</p></li>
+            </ul>
+
+            <h3 class="h-tag">Frameworks &amp; Libraries</h3>
+            <ul class="list">
+                <li class="hover-card"><h4>NumPy</h4><p>Efficient numerical computations.</p></li>
+                <li class="hover-card"><h4>Pandas</h4><p>Advanced data manipulation.</p></li>
+                <li class="hover-card"><h4>Matplotlib</h4><p>Data visualization and insights.</p></li>
+                <li class="hover-card"><h4>Flask</h4><p>Currently learning backend development.</p></li>
+            </ul>
+
+            <h3 class="h-tag">Soft Skills</h3>
+            <ul class="list">
+                <li class="hover-card"><h4>Communication</h4><p>Clearly expressing ideas and understanding others in team environments.</p></li>
+                <li class="hover-card"><h4>Teamwork</h4><p>Collaborating effectively to achieve shared goals.</p></li>
+                <li class="hover-card"><h4>Problem Solving</h4><p>Analyzing challenges and finding efficient, logical solutions.</p></li>
+                <li class="hover-card"><h4>Leadership</h4><p>Guiding teams and taking responsibility for outcomes.</p></li>
+                <li class="hover-card"><h4>Adaptability</h4><p>Quickly adjusting to new tools, challenges, and environments.</p></li>
+                <li class="hover-card"><h4>Time Management</h4><p>Organizing tasks efficiently and meeting deadlines consistently.</p></li>
+                <li class="hover-card"><h4>Critical Thinking</h4><p>Making well-reasoned decisions based on analysis and logic.</p></li>
+                <li class="hover-card"><h4>Emotional Intelligence</h4><p>Understanding and managing emotions in professional settings.</p></li>
+                <li class="hover-card"><h4>Resilience</h4><p>Staying consistent and focused despite challenges.</p></li>
+                <li class="hover-card"><h4>Creativity</h4><p>Thinking outside the box to develop innovative solutions.</p></li>
+                <li class="hover-card"><h4>Negotiation</h4><p>Reaching balanced agreements in collaborative situations.</p></li>
+                <li class="hover-card"><h4>Networking</h4><p>Building and maintaining valuable professional relationships.</p></li>
+            </ul>
+        </section>
+
+        <!-- Learning journey and next goals -->
+        <section id="journey" aria-labelledby="journey-heading">
+            <h2 id="journey-heading" class="h-tag">Currently Learning &amp; Next Goals</h2>
+            <p>
+                I'm constantly pushing myself to grow and expand my skill set.
+                Here are the technologies and fields I'm currently focusing on next:
+            </p>
+            <ul class="list">
+                <li class="hover-card"><h3>JavaScript</h3><p>Building dynamic and interactive front-end experiences.</p></li>
+                <li class="hover-card"><h3>SQL</h3><p>Strengthening my data analysis and database management skills.</p></li>
+                <li class="hover-card"><h3>PHP</h3><p>Exploring backend development and server-side logic.</p></li>
+                <li class="hover-card"><h3>Django</h3><p>Advancing towards professional backend web development.</p></li>
+                <li class="hover-card"><h3>C / C++</h3><p>Improving low-level understanding and performance-oriented programming.</p></li>
+                <li class="hover-card"><h3>C#</h3><p>Preparing for game development using Unity.</p></li>
+                <li class="hover-card"><h3>Flutter</h3><p>Building cross-platform mobile applications.</p></li>
+            </ul>
+        </section>
+
+        <!-- Selected projects -->
+        <section id="projects" aria-labelledby="projects-heading">
+            <h2 id="projects-heading" class="h-tag">My Projects</h2>
+            <p>
+                I've worked on many projects over the years — some for practice,
+                some lost, and many that helped shape my skills.
+                <br><br>
+                Instead of showcasing everything, I focus on the projects that truly represent
+                my level and thinking in each field.
+            </p>
+            <ul class="list">
+                <li class="hover-card">
+                    <h3>Offline English-Arabic Translator</h3>
+                    <p>
+                        One of my earliest yet most meaningful projects. It wasn't just simple —
+                        it reflected the best logic I had developed before fully transitioning
+                        into data analysis.
+                        <br><br>
+                        Built with Python to be fast, lightweight, and efficient — no internet required.
+                    </p>
+                    <a href="https://github.com/abo3li-pro/py-translator"
+                       target="_blank" rel="noopener noreferrer"
+                       class="btn hover-scale">View Project on GitHub</a>
+                </li>
+                <li class="hover-card">
+                    <h3>Data Analysis Project</h3>
+                    <p>
+                        This is where I have the most experience. I worked on analyzing large
+                        datasets, extracting insights, and presenting them clearly.
+                    </p>
+                    <a href="https://github.com/abo3li-pro/2nd-analysis"
+                       target="_blank" rel="noopener noreferrer"
+                       class="btn hover-scale">View Project on GitHub</a>
+                </li>
+                <li class="hover-card">
+                    <h3>Portfolio Website (Front-end)</h3>
+                    <p>
+                        My most recent front-end project is the one you're looking at right now.
+                        <br><br>
+                        But stay tuned — more advanced projects are already in progress.
+                    </p>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Certificates and training programs -->
+        <section id="certificates" aria-labelledby="certificates-heading">
+            <h2 id="certificates-heading" class="h-tag">Certificates</h2>
+            <p>
+                While I rely heavily on self-learning,
+                I've also completed selected programs to strengthen my foundation.
+            </p>
+            <ul class="list">
+                <li class="hover-card">
+                    <h3>Digital Egypt Cubs Initiative (DECI) — Level 2</h3>
+                    <p>
+                        This was my first comprehensive exposure to the world of IT.
+                        <br><br>
+                        It ignited my passion for learning and exploring new technologies,
+                        motivating me to continuously pursue knowledge in areas that excite me.
+                    </p>
+                </li>
+                <li class="hover-card">
+                    <h3>Digital Egypt Cubs Initiative (DECI) — Level 3</h3>
+                    <p>
+                        At this stage, I specialized in Data Analysis, aligning my skills with
+                        my interests.
+                        <br><br>
+                        I chose this field because it resonated with my strengths and curiosity,
+                        while nurturing my lifelong aspiration to become an AI Engineer.
+                    </p>
+                </li>
+            </ul>
+        </section>
+
+    </main>
+
+    <!-- Footer — contact and social links -->
+    <footer id="contact">
+        <h2 class="h-tag">Contact Me</h2>
+        <address>
+            <p>
+                Reach me by email:
+                <!-- Cloudflare obfuscates the real address to stop spam bots -->
+                <a href="/cdn-cgi/l/email-protection#076f66747466694730667474666929746e7362"
+                   class="btn hover-scale">Email Me</a>
+            </p>
+            <div class="footer-links">
+                <a href="https://www.linkedin.com/in/hassan-mohamed-321569342/"
+                   target="_blank" rel="noopener noreferrer"
+                   class="btn hover-scale"
+                   aria-label="Hassan Mohamed on LinkedIn">LinkedIn</a>
+
+                <a href="https://www.facebook.com/Hassan.Mohamed.Fathallah/"
+                   target="_blank" rel="noopener noreferrer"
+                   class="btn hover-scale"
+                   aria-label="Hassan Mohamed on Facebook">Facebook</a>
+
+                <a href="https://github.com/abo3li-pro"
+                   target="_blank" rel="noopener noreferrer"
+                   class="btn hover-scale"
+                   aria-label="Hassan Mohamed on GitHub">GitHub</a>
+            </div>
+        </address>
+        <p class="footer-sign"><strong>Work with you soon 👋</strong></p>
+    </footer>
+
+    <!-- Cloudflare's script that decodes the obfuscated email address above -->
+    <script data-cfasync="false"
+            src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+
+    <!--
+        defer means this script runs after the HTML is fully parsed
+        but before DOMContentLoaded — so it never delays rendering.
+    -->
+    <script defer src="main.js"></script>
+
+</body>
+</html>

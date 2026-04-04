@@ -1,0 +1,171 @@
+/*
+    styles.css — below-the-fold styles
+    ────────────────────────────────────────────────────────────
+    This file is loaded asynchronously so it never blocks the
+    first paint. It only contains styles for sections the user
+    hasn't scrolled to yet.
+
+    Above-the-fold styles (nav, hero) live inlined inside the
+    <head> of index.html to guarantee zero network wait time
+    before something appears on screen.
+    ────────────────────────────────────────────────────────────
+*/
+
+
+/* ── Font family upgrades ────────────────────────────────────
+   Once Inter and Satoshi have finished downloading, these rules
+   override the system-font fallback set in the critical CSS.
+   The swap is invisible because the layout doesn't change.
+────────────────────────────────────────────────────────────── */
+body {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.h-tag,
+ul h3,
+ul h4 {
+    font-family: 'Satoshi', 'Inter', system-ui, sans-serif;
+}
+
+
+/* ── Hover effects — desktop only ───────────────────────────
+   The (hover: hover) and (pointer: fine) combination targets
+   only real mouse pointers, not touchscreens. This prevents
+   hover states from sticking after a tap on mobile.
+────────────────────────────────────────────────────────────── */
+@media (hover: hover) and (pointer: fine) {
+
+    .hover-scale:hover {
+        transform:    scale(1.05);
+        border-color: var(--accent-color);
+    }
+
+    .hover-card:hover {
+        transform:  translateY(-4px);
+        box-shadow: var(--accent-shadow);
+    }
+
+    nav:hover {
+        transform:    translateX(-50%) scale(1.03);
+        box-shadow:   var(--shadow);
+        border-color: var(--text);
+    }
+}
+
+/* Touch feedback — replaces hover on phones and tablets */
+.hover-scale:active { transform: scale(0.97);  border-color: var(--accent-color); }
+.hover-card:active  { box-shadow: var(--accent-shadow); }
+
+
+/* ── Page sections ───────────────────────────────────────────
+   content-visibility: auto tells the browser to skip painting
+   offscreen sections entirely until the user scrolls near them.
+   This is one of the biggest rendering wins on long pages.
+────────────────────────────────────────────────────────────── */
+section {
+    padding:                48px 0;
+    content-visibility:     auto;
+    contain-intrinsic-size: 0 400px; /* estimated height prevents scroll-bar jumping */
+}
+
+
+/* ── Skill / project / certificate cards ────────────────────
+   auto-fit + minmax means the grid goes from 1 column on tiny
+   phones to as many columns as fit on desktop — with no
+   JavaScript and no breakpoints needed.
+────────────────────────────────────────────────────────────── */
+.list {
+    display:               grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap:                   16px;
+    list-style:            none;
+    padding:               0;
+}
+
+/* Force a single column on phones narrower than 480px */
+@media (max-width: 479px) {
+    .list { grid-template-columns: 1fr; }
+}
+
+.list li {
+    background:    var(--card);
+    border:        1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding:       20px;
+    transition:    transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.list h3,
+.list h4 {
+    margin-bottom: 8px;
+    font-weight:   600;
+    font-size:     1rem;
+}
+
+.list p {
+    margin:   0;
+    padding:  0;
+    opacity:  0.8;
+    font-size: 0.9rem;
+}
+
+
+/* ── Footer ──────────────────────────────────────────────────
+   Rounded top corners give it a "tray" feeling that sits
+   cleanly at the bottom of the page.
+────────────────────────────────────────────────────────────── */
+footer {
+    background:    var(--bg-dark);
+    padding:       36px 16px 24px;
+    margin-top:    48px;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    text-align:    center;
+}
+
+footer address {
+    font-style: normal; /* <address> is italic by default — this overrides that */
+}
+
+.footer-links {
+    display:         flex;
+    flex-wrap:       wrap; /* stacks on narrow screens instead of overflowing */
+    justify-content: center;
+    gap:             10px;
+    padding:         12px 0;
+    width:           100%;
+}
+
+.footer-sign {
+    margin-top: 16px;
+    text-align: center;
+}
+
+
+/* ── Keyboard focus ring ─────────────────────────────────────
+   :focus-visible only triggers on keyboard navigation,
+   not on mouse clicks — so it's helpful without being
+   visually noisy for mouse users.
+────────────────────────────────────────────────────────────── */
+:focus-visible {
+    outline:        2px solid var(--accent-color);
+    outline-offset: 3px;
+    border-radius:  4px;
+}
+
+
+/* ── Responsive body padding ─────────────────────────────────
+   More horizontal breathing room as the screen gets larger.
+────────────────────────────────────────────────────────────── */
+@media (min-width: 600px) {
+    body    { padding: 96px 24px 0; }
+    section { padding: 56px 0; }
+}
+
+@media (min-width: 768px) {
+    body    { padding: 104px 32px 0; }
+    section { padding: 72px 0; }
+}
+
+@media (min-width: 1024px) {
+    body { padding: 110px 40px 0; }
+}

@@ -1,0 +1,62 @@
+# robots.txt for 7assan.site
+# ─────────────────────────────────────────────────────────────
+# This file tells web crawlers which parts of the site they
+# can and can't access. The format must follow the Robots
+# Exclusion Protocol exactly — unknown directives cause
+# Google Search Console to flag the whole file as invalid.
+# ─────────────────────────────────────────────────────────────
+
+# Rules for all crawlers
+User-agent: *
+Allow: /
+
+# Keep internal Cloudflare paths out of search indexes
+Disallow: /cdn-cgi/
+
+# ─────────────────────────────────────────────────────────────
+# AI training opt-out
+# ─────────────────────────────────────────────────────────────
+# The correct way to block AI training crawlers is to list
+# each bot individually — NOT with "Content-Signal" which
+# is not a real robots.txt directive and breaks Google's parser.
+
+# Block OpenAI's training crawler
+User-agent: GPTBot
+Disallow: /
+
+# Block OpenAI's browsing/search crawler (ChatGPT browsing)
+User-agent: ChatGPT-User
+Disallow: /
+
+# Block Google's AI training crawler (Gemini, Bard, Vertex AI)
+User-agent: Google-Extended
+Disallow: /
+
+# Block Common Crawl (used to train many open-source LLMs)
+User-agent: CCBot
+Disallow: /
+
+# Block Anthropic's training crawler
+User-agent: anthropic-ai
+Disallow: /
+
+# Block Cohere's training crawler
+User-agent: cohere-ai
+Disallow: /
+
+# Block Meta's AI crawler
+User-agent: FacebookBot
+Disallow: /
+
+# Block Apple's AI crawler
+User-agent: Applebot-Extended
+Disallow: /
+
+# Block Bytedance / TikTok crawler
+User-agent: Bytespider
+Disallow: /
+
+# ─────────────────────────────────────────────────────────────
+# Sitemap location — helps Google discover all pages faster
+# ─────────────────────────────────────────────────────────────
+Sitemap: https://7assan.site/sitemap.xml
