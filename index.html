@@ -676,23 +676,22 @@
             </p>
         </section>
 
-        <!-- GitHub Stats -->
+        <!-- GitHub Activity -->
         <section id="github-stats" class="reveal" style="text-align: center; margin: 40px 0;">
             <h2 class="h-tag">GitHub Activity</h2>
-            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
-                <!-- Updated URLs with more stable endpoints and a silent error fallback -->
-                <img src="https://github-readme-stats.vercel.app/api?username=abo3li-pro&show_icons=true&theme=dark" 
-                     alt="Hassan's GitHub Stats" 
+            <div style="background: var(--card); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border);">
+                <!-- Using a more stable contribution chart provider -->
+                <img src="https://ghchart.rshah.org/3b82f6/abo3li-pro" 
+                     alt="Hassan's GitHub Contributions Chart" 
                      loading="lazy" 
-                     onerror="this.style.display='none'"
-                     style="max-width: 100%; border-radius: 10px;">
-                <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=abo3li-pro&layout=compact&theme=dark" 
-                     alt="Most used languages" 
-                     loading="lazy" 
-                     onerror="this.style.display='none'"
-                     style="max-width: 100%; border-radius: 10px;">
+                     style="width: 100%; height: auto; filter: brightness(1.2);">
+                <p style="margin-top: 15px; font-size: 0.85rem; opacity: 0.8;">
+                    Annual contribution graph — tracked directly from GitHub
+                </p>
             </div>
-            <p style="font-size: 0.7rem; opacity: 0.4;">Real-time stats from GitHub API</p>
+            <a href="https://github.com/abo3li-pro" target="_blank" class="btn hover-scale" style="margin-top: 20px;">
+                View full profile on GitHub
+            </a>
         </section>
 
         <!-- Skills — languages, frameworks, and soft skills -->
